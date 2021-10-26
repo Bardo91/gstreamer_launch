@@ -27,6 +27,6 @@ target_include_directories(${PLUGIN_NAME} PRIVATE ${GSTREAMER_INCLUDE_DIRS} "/us
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(gstreamer_launch_bundled_libraries
-  ""
+  ${GSTREAMER_LIBRARIES}
   PARENT_SCOPE
 )
