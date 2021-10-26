@@ -4,8 +4,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:gstreamer_launch/gstreamer_launch.dart';
 
-import 'package:gstreamer_launch/gstreamer_launch.dart';
-
 void main() {
   runApp(const MyApp());
 }

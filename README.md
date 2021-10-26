@@ -1,15 +1,10 @@
 # gstreamer_launch
 
-A new flutter plugin project.
+A plugin to use gstreamer in your desktop applications (and possibly in mobiles in the future).
 
 ## Getting Started
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+For windows GStreamer using the **development** installer. Link: https://gstreamer.freedesktop.org/download/
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+For linux, install it from repositories.
 

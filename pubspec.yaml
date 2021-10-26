@@ -23,3 +23,5 @@ flutter:
     platforms:
       linux:
         pluginClass: GstreamerLaunchPlugin
+      windows:
+        pluginClass: GstreamerLaunchPlugin
