@@ -1,8 +1,8 @@
-## 0.1.1-dev.1
+## 0.1.2-dev.1
 
 * OS Compibility:
   * Linux   ✅
-  * Windows ❌
+  * Windows ✅
   * OSx     ❌
   * Android ❌
   * IOs     ❌
