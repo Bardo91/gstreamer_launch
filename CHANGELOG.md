@@ -1,4 +1,4 @@
-## 0.1.0-dev.1
+## 0.1.1-dev.1
 
 * OS Compibility:
   * Linux   ✅
@@ -7,7 +7,9 @@
   * Android ❌
   * IOs     ❌
 
-Drafted plugin. Currently just gst_parse_launch has been wrapped.
+* Wrapped methods:
+  * gst_parse_launch
+  * gst_element_set_state
 
 
 * Planned functionalities:
