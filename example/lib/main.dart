@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -61,8 +63,15 @@ class _MyAppState extends State<MyApp> {
                   Expanded(
                       child: ElevatedButton(
                           onPressed: () {
-                            GstreamerLaunch.nativeGstParseLaunch(
-                                    "v4l2src ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=0.0.0.0 port=5000")
+                            String cmd = "";
+                            if(Platform.isLinux){
+                              cmd = "v4l2src ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=0.0.0.0 port=5000";
+                            }else if(Platform.isWindows){
+                              cmd = "ksvideosrc ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000";
+                            }else{
+                              return;
+                            }
+                            GstreamerLaunch.nativeGstParseLaunch(cmd)
                                 .then((value) {
                               _gstPipeServer = value;
                               GstreamerLaunch.nativeGstSetElementstate(
@@ -85,9 +94,15 @@ class _MyAppState extends State<MyApp> {
                   Expanded(
                       child: ElevatedButton(
                           onPressed: () {
-                            GstreamerLaunch.nativeGstParseLaunch(
-                                    "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! dshowvideosink")
-                                .then((value) {
+                            String cmd = "";
+                            if(Platform.isLinux){
+                              cmd = "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! xvimagesink";
+                            }else if(Platform.isWindows){
+                              cmd = "udpsrc address=127.0.0.1 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! d3dvideosink";
+                            }else{
+                              return;
+                            }
+                            GstreamerLaunch.nativeGstParseLaunch(cmd).then((value) {
                               _gstPipeClient = value;
                               GstreamerLaunch.nativeGstSetElementstate(
                                   _gstPipeClient, 4);
