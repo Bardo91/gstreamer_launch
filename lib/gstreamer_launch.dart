@@ -44,8 +44,8 @@ class GstreamerLaunch {
   }
 
   static DynamicLibrary _getDynamicLibraryGst() {
-    final DynamicLibrary nativeEdgeDetection = Platform.isLinux
-        ? DynamicLibrary.open("libgstreamer_launch_plugin.so")
+    final DynamicLibrary nativeEdgeDetection = Platform.isWindows
+        ? DynamicLibrary.open("gstreamer_launch_plugin.dll")
         : DynamicLibrary.process();
     return nativeEdgeDetection;
   }

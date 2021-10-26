@@ -86,7 +86,7 @@ class _MyAppState extends State<MyApp> {
                       child: ElevatedButton(
                           onPressed: () {
                             GstreamerLaunch.nativeGstParseLaunch(
-                                    "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! xvimagesink")
+                                    "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! dshowvideosink")
                                 .then((value) {
                               _gstPipeClient = value;
                               GstreamerLaunch.nativeGstSetElementstate(

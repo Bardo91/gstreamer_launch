@@ -83,8 +83,8 @@ void GstreamerLaunchPluginRegisterWithRegistrar(
           ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
 }
 
-
-extern "C" void *native_gst_parse_launch(char *str) {
+extern "C" __declspec(dllexport)
+void *native_gst_parse_launch(char *str) {
   if(!gst_is_initialized())
     gst_init(0,0);
   
@@ -92,7 +92,8 @@ extern "C" void *native_gst_parse_launch(char *str) {
   return (void*) pipe;
 }
 
-extern "C" void native_gst_element_set_state(void *_pipe, int _state){
+extern "C" __declspec(dllexport)
+void native_gst_element_set_state(void *_pipe, int _state){
   if(_state < 0 || _state > 4){
     std::cout << "Error, gst states are within 0 and 4. https://gstreamer.freedesktop.org/documentation/gstreamer/gstelement.html?gi-language=c#GstState" << std::endl;
     return;
