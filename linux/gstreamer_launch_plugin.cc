@@ -77,12 +77,21 @@ void gstreamer_launch_plugin_register_with_registrar(FlPluginRegistrar* registra
 
 extern "C" __attribute__((visibility("default"))) __attribute__((used))
 void *native_gst_parse_launch(char *str) {
-  std::cout << "holiii" << std::endl;
-  gst_init(0,0);
+  if(!gst_is_initialized())
+    gst_init(0,0);
+  
   GstElement * pipe = gst_parse_launch(str, nullptr);
-  gst_element_set_state (pipe, GST_STATE_PLAYING);
-  // auto bus = gst_element_get_bus (pipe);
-  // gst_bus_poll (bus, (GstMessageType) (GST_MESSAGE_EOS | GST_MESSAGE_ERROR), -1);
-  // std::this_thread::sleep_for(std::chrono::seconds(10));
   return (void*) pipe;
+}
+
+extern "C" __attribute__((visibility("default"))) __attribute__((used))
+void native_gst_element_set_state(void *_pipe, int _state){
+  if(_state < 0 || _state > 4){
+    std::cout << "Error, gst states are within 0 and 4. https://gstreamer.freedesktop.org/documentation/gstreamer/gstelement.html?gi-language=c#GstState" << std::endl;
+    return;
+  }
+
+  GstElement *pipe = reinterpret_cast<GstElement*>(_pipe);
+  gst_element_set_state(pipe, static_cast<GstState>(_state));
+  
 }

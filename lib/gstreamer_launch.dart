@@ -33,6 +33,16 @@ class GstreamerLaunch {
     return GstElement(nativePtr: gstLaunch(nativeCmd));
   }
 
+  static Future<void> nativeGstSetElementstate(
+      GstElement element, int state) async {
+    var nativeLib = _getDynamicLibraryGst();
+    var gstSetElementState = nativeLib.lookupFunction<
+        Void Function(Pointer<Void>, Int16),
+        void Function(Pointer<Void>, int)>("native_gst_element_set_state");
+
+    gstSetElementState(element.nativePtr, state);
+  }
+
   static DynamicLibrary _getDynamicLibraryGst() {
     final DynamicLibrary nativeEdgeDetection = Platform.isLinux
         ? DynamicLibrary.open("libgstreamer_launch_plugin.so")
