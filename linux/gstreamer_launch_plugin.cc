@@ -5,6 +5,11 @@
 #include <sys/utsname.h>
 
 #include <cstring>
+#include <iostream>
+#include <chrono>
+#include <thread>
+
+#include <gst/gst.h>
 
 #define GSTREAMER_LAUNCH_PLUGIN(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), gstreamer_launch_plugin_get_type(), \
@@ -67,4 +72,17 @@ void gstreamer_launch_plugin_register_with_registrar(FlPluginRegistrar* registra
                                             g_object_unref);
 
   g_object_unref(plugin);
+}
+
+
+extern "C" __attribute__((visibility("default"))) __attribute__((used))
+void *native_gst_parse_launch(char *str) {
+  std::cout << "holiii" << std::endl;
+  gst_init(0,0);
+  GstElement * pipe = gst_parse_launch(str, nullptr);
+  gst_element_set_state (pipe, GST_STATE_PLAYING);
+  // auto bus = gst_element_get_bus (pipe);
+  // gst_bus_poll (bus, (GstMessageType) (GST_MESSAGE_EOS | GST_MESSAGE_ERROR), -1);
+  // std::this_thread::sleep_for(std::chrono::seconds(10));
+  return (void*) pipe;
 }
