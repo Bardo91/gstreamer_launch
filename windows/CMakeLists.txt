@@ -43,9 +43,15 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE ${GSTREAMER_LIBRARIES})
 target_include_directories(${PLUGIN_NAME} PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 
 
+file(
+        GLOB_RECURSE
+        GSTREAMER_BUNDLED_DLL
+        "C:/gstreamer/1.0/msvc_x86_64/bin/*dll"
+)
+
 # List of absolute paths to libraries that should be bundled with the plugin
 set(gstreamer_launch_bundled_libraries
-  # ${GSTREAMER_LIBRARIES}
+  ${GSTREAMER_BUNDLED_DLL}
   ""
   PARENT_SCOPE
 )
