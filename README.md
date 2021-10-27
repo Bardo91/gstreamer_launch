@@ -9,3 +9,7 @@ Add the binaries folder to system PATH.
 
 For linux, install it from repositories.
 
+## Future
+
+* Improve CMakeLists to search properly in both windows and linux the dependencies.
+* Allow to access pads of sinks and sources to get/set the raw data in dart code.

@@ -24,18 +24,18 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mo
 # target_link_libraries(${PLUGIN_NAME} PRIVATE ${GSTREAMER_LIBRARIES})
 # target_include_directories(${PLUGIN_NAME} PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 
-set(GSTREAMER_INCLUDE_DIRS  "D:/gstreamer/1.0/msvc_x86_64/include" 
-                            "D:/gstreamer/1.0/msvc_x86_64/include/gstreamer-1.0"
-                            "D:/gstreamer/1.0/msvc_x86_64/include/glib-2.0"
-                            "D:/gstreamer/1.0/msvc_x86_64/lib/glib-2.0/include"
-                            "D:/gstreamer/1.0/msvc_x86_64/include/"
-                            "D:/gstreamer/1.0/msvc_x86_64/include/"
-                            "D:/gstreamer/1.0/msvc_x86_64/include/")
+set(GSTREAMER_INCLUDE_DIRS  "C:/gstreamer/1.0/msvc_x86_64/include" 
+                            "C:/gstreamer/1.0/msvc_x86_64/include/gstreamer-1.0"
+                            "C:/gstreamer/1.0/msvc_x86_64/include/glib-2.0"
+                            "C:/gstreamer/1.0/msvc_x86_64/lib/glib-2.0/include"
+                            "C:/gstreamer/1.0/msvc_x86_64/include/"
+                            "C:/gstreamer/1.0/msvc_x86_64/include/"
+                            "C:/gstreamer/1.0/msvc_x86_64/include/")
 
 file(
         GLOB_RECURSE
         GSTREAMER_LIBRARIES
-        "D:/gstreamer/1.0/msvc_x86_64/lib/*dll.a"
+        "C:/gstreamer/1.0/msvc_x86_64/lib/*dll.a"
 )
 
 
