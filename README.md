@@ -5,7 +5,7 @@ A plugin to use gstreamer in your desktop applications (and possibly in mobiles 
 ## Getting Started
 
 For windows GStreamer download and install both **runtime** and **development** installer. Link: https://gstreamer.freedesktop.org/download/
-Add the binaries folder to system PATH.
+Add the binaries folder to system PATH. Current implementation does not bundle DLLs with the plugin, thus it is necessary to install the runtime in every computer. 
 
 For linux, install it from repositories.
 
