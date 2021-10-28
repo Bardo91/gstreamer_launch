@@ -51,7 +51,7 @@ file(
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(gstreamer_launch_bundled_libraries
-  ${GSTREAMER_BUNDLED_DLL}
+  #${GSTREAMER_BUNDLED_DLL}
   ""
   PARENT_SCOPE
 )
