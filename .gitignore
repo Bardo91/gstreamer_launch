@@ -27,3 +27,9 @@
 .dart_tool/
 .packages
 build/
+example/windows/flutter/generated_plugin_registrant.cc
+example/windows/flutter/generated_plugin_registrant.h
+example/windows/flutter/generated_plugins.cmake
+/example/windows/flutter/generated_plugin_registrant.cc
+/example/windows/flutter/generated_plugin_registrant.h
+/example/windows/flutter/generated_plugins.cmake
