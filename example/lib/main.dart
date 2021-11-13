@@ -98,7 +98,7 @@ class _MyAppState extends State<MyApp> {
                             if(Platform.isLinux){
                               cmd = "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! xvimagesink";
                             }else if(Platform.isWindows){
-                              cmd = "udpsrc address=127.0.0.1 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! d3dvideosink";
+                              cmd = "udpsrc address=127.0.0.1 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! appsink name=appsink";
                             }else{
                               return;
                             }
@@ -118,6 +118,14 @@ class _MyAppState extends State<MyApp> {
                           },
                           child: const Text("Stop Client")))
                 ],
+              ),
+              Container(
+                child: Expanded(child: ElevatedButton(
+                  onPressed: (){
+                    GstreamerLaunch.nativeGstSignalConnect(_gstPipeClient, "appsink");
+                  },
+                  child: const Text("Retrieve node"),
+                ),),
               )
             ],
           )),

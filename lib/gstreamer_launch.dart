@@ -13,6 +13,7 @@ class GstElement {
 }
 
 typedef NativeGstLaunchFunction = Pointer<Void> Function(Pointer<Utf8> x);
+typedef GstreamerCallbackVideo = Void Function(void);
 
 class GstreamerLaunch {
   static const MethodChannel _channel = MethodChannel('gstreamer_launch');
@@ -20,6 +21,13 @@ class GstreamerLaunch {
   static Future<String?> get platformVersion async {
     final String? version = await _channel.invokeMethod('getPlatformVersion');
     return version;
+  }
+
+  static DynamicLibrary _getDynamicLibraryGst() {
+    final DynamicLibrary nativeEdgeDetection = Platform.isWindows
+        ? DynamicLibrary.open("gstreamer_launch_plugin.dll")
+        : DynamicLibrary.process();
+    return nativeEdgeDetection;
   }
 
   static Future<GstElement> nativeGstParseLaunch(String cmd) async {
@@ -33,8 +41,7 @@ class GstreamerLaunch {
     return GstElement(nativePtr: gstLaunch(nativeCmd));
   }
 
-  static Future<void> nativeGstSetElementstate(
-      GstElement element, int state) async {
+  static Future<void> nativeGstSetElementstate( GstElement element, int state) async {
     var nativeLib = _getDynamicLibraryGst();
     var gstSetElementState = nativeLib.lookupFunction<
         Void Function(Pointer<Void>, Int16),
@@ -43,10 +50,17 @@ class GstreamerLaunch {
     gstSetElementState(element.nativePtr, state);
   }
 
-  static DynamicLibrary _getDynamicLibraryGst() {
-    final DynamicLibrary nativeEdgeDetection = Platform.isWindows
-        ? DynamicLibrary.open("gstreamer_launch_plugin.dll")
-        : DynamicLibrary.process();
-    return nativeEdgeDetection;
+  
+  static void testFn(){
+    print("testing callbacks as ptr");
+  }
+
+  static Future<void> nativeGstSignalConnect( GstElement element, String sinkname) async {
+    var nativeLib = _getDynamicLibraryGst();
+    var gstSignalConnect = nativeLib.lookupFunction<
+        Void Function(Pointer<Void>, Pointer<Utf8>),
+        void Function(Pointer<Void>, Pointer<Utf8>)>("native_gst_signal_connect");
+    
+    gstSignalConnect(element.nativePtr, sinkname.toNativeUtf8());
   }
 }
