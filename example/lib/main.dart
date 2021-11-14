@@ -5,6 +5,8 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:gstreamer_launch/gstreamer_launch.dart';
+import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 
 void main() {
   runApp(const MyApp());
@@ -120,12 +122,18 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               Container(
-                child: Expanded(child: ElevatedButton(
+                child:  ElevatedButton(
                   onPressed: (){
-                    GstreamerLaunch.nativeGstSignalConnect(_gstPipeClient, "appsink");
+                    var appsink = GstreamerLaunch.getAppSinkByName(_gstPipeClient, "appsink");
+                    appsink.then((value){
+                        GstreamerLaunch.pullSampleAndRunCallback(value, (Pointer<Uint8> _data, int _width, int _height, Pointer<Utf8> _format){
+                                          Image.memory(_data.asTypedList(_width*_height*3), width:   _width.toDouble(), height: _height.toDouble());
+                                          return 1;  
+                                        });
+                        });
                   },
                   child: const Text("Retrieve node"),
-                ),),
+                ),
               )
             ],
           )),

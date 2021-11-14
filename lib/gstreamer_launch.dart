@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
-import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:ffi/ffi.dart';
@@ -14,6 +13,9 @@ class GstElement {
 
 typedef NativeGstLaunchFunction = Pointer<Void> Function(Pointer<Utf8> x);
 typedef GstreamerCallbackVideo = Void Function(void);
+
+typedef DartImageCallbackPrototypeNative = Int32 Function(Pointer<Uint8>, Int32, Int32, Pointer<Utf8>);
+typedef DartImageCallbackPrototype = int Function(Pointer<Uint8>, int, int, Pointer<Utf8>);
 
 class GstreamerLaunch {
   static const MethodChannel _channel = MethodChannel('gstreamer_launch');
@@ -50,17 +52,40 @@ class GstreamerLaunch {
     gstSetElementState(element.nativePtr, state);
   }
 
-  
-  static void testFn(){
-    print("testing callbacks as ptr");
-  }
-
-  static Future<void> nativeGstSignalConnect( GstElement element, String sinkname) async {
+  static Future<GstElement> getAppSinkByName(GstElement element, String sinkname) async {
     var nativeLib = _getDynamicLibraryGst();
     var gstSignalConnect = nativeLib.lookupFunction<
-        Void Function(Pointer<Void>, Pointer<Utf8>),
-        void Function(Pointer<Void>, Pointer<Utf8>)>("native_gst_signal_connect");
+        Pointer<Void> Function(Pointer<Void>, Pointer<Utf8>),
+        Pointer<Void> Function(Pointer<Void>, Pointer<Utf8>)>("native_gst_get_app_sink_by_name");
     
-    gstSignalConnect(element.nativePtr, sinkname.toNativeUtf8());
+    return GstElement(nativePtr: gstSignalConnect(element.nativePtr, sinkname.toNativeUtf8()));
   }
+  
+  static Future<> pullSampleAndRunCallback( GstElement _appSink, DartImageCallbackPrototype _callback) async {
+    var nativeLib = _getDynamicLibraryGst();
+
+    var gstSignalConnect = nativeLib.lookupFunction<
+        Void Function(Pointer<Void>, Pointer<NativeFunction<DartImageCallbackPrototypeNative>>),
+        void Function(Pointer<Void>, Pointer<NativeFunction<DartImageCallbackPrototypeNative>>)>("native_gst_pull_sample_callback");
+    
+
+    Pointer<NativeFunction<DartImageCallbackPrototypeNative>> pointer = Pointer.fromFunction(_callback, 0);
+
+    gstSignalConnect(_appSink.nativePtr, pointer);
+
+  }
+
+  // static Future<void> nativeGstSignalConnect( GstElement element, String sinkname) async {
+  //   var nativeLib = _getDynamicLibraryGst();
+
+  //   var gstSignalConnect = nativeLib.lookupFunction<
+  //       Void Function(Pointer<Void>, Pointer<Utf8>, Pointer<NativeFunction<DartCallbackPrototype>>),
+  //       void Function(Pointer<Void>, Pointer<Utf8>, Pointer<NativeFunction<DartCallbackPrototype>>)>("native_gst_signal_connect");
+    
+
+  //   Pointer<NativeFunction<Int32 Function(Pointer<Uint8>,Int32, Int32, Pointer<Utf8>)>> pointer = Pointer.fromFunction(dartCallback, 0);
+
+  //   gstSignalConnect(element.nativePtr, sinkname.toNativeUtf8(), pointer);
+  // }
+
 }
