@@ -24,6 +24,7 @@ class _MyAppState extends State<MyApp> {
 
   late GstElement _gstPipeServer;
   late GstElement _gstPipeClient;
+  Image image = Image.network("https://flutter.dev/assets/images/shared/brand/flutter/logo/flutter-lockup.png");
 
   @override
   void initState() {
@@ -73,10 +74,10 @@ class _MyAppState extends State<MyApp> {
                             }else{
                               return;
                             }
-                            GstreamerLaunch.nativeGstParseLaunch(cmd)
+                            GstreamerLaunch.parseLaunch(cmd)
                                 .then((value) {
                               _gstPipeServer = value;
-                              GstreamerLaunch.nativeGstSetElementstate(
+                              GstreamerLaunch.setElementState(
                                   _gstPipeServer, 4);
                             });
                           },
@@ -85,7 +86,7 @@ class _MyAppState extends State<MyApp> {
                   Expanded(
                       child: ElevatedButton(
                           onPressed: () {
-                            GstreamerLaunch.nativeGstSetElementstate(
+                            GstreamerLaunch.setElementState(
                                 _gstPipeServer, 1);
                           },
                           child: const Text("Stop Server")))
@@ -104,9 +105,9 @@ class _MyAppState extends State<MyApp> {
                             }else{
                               return;
                             }
-                            GstreamerLaunch.nativeGstParseLaunch(cmd).then((value) {
+                            GstreamerLaunch.parseLaunch(cmd).then((value) {
                               _gstPipeClient = value;
-                              GstreamerLaunch.nativeGstSetElementstate(
+                              GstreamerLaunch.setElementState(
                                   _gstPipeClient, 4);
                             });
                           },
@@ -115,7 +116,7 @@ class _MyAppState extends State<MyApp> {
                   Expanded(
                       child: ElevatedButton(
                           onPressed: () {
-                            GstreamerLaunch.nativeGstSetElementstate(
+                            GstreamerLaunch.setElementState(
                                 _gstPipeClient, 1);
                           },
                           child: const Text("Stop Client")))
@@ -126,15 +127,19 @@ class _MyAppState extends State<MyApp> {
                   onPressed: (){
                     var appsink = GstreamerLaunch.getAppSinkByName(_gstPipeClient, "appsink");
                     appsink.then((value){
-                        GstreamerLaunch.pullSampleAndRunCallback(value, (Pointer<Uint8> _data, int _width, int _height, Pointer<Utf8> _format){
-                                          Image.memory(_data.asTypedList(_width*_height*3), width:   _width.toDouble(), height: _height.toDouble());
-                                          return 1;  
-                                        });
+                        GstreamerLaunch.pullSample(value).then((bytes){
+                            //image = Image.memory(bytes);
+                            setState(() {
+                              
+                            });
+                          });
                         });
                   },
                   child: const Text("Retrieve node"),
                 ),
-              )
+              ),
+                Container(
+child: image,)
             ],
           )),
     );

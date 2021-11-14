@@ -102,64 +102,6 @@ void native_gst_element_set_state(void *_pipe, int _state) {
   gst_element_set_state(pipe, static_cast<GstState>(_state));
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-extern "C" __declspec(dllexport) 
-int native_gst_pull_sample_callback(GstElement *sink, void *_dartCb) {
-  GstSample *sample;
-  g_signal_emit_by_name(sink, "pull-sample", &sample);
-  if (sample) {
-    // Get info from sample
-    auto caps = gst_sample_get_caps(sample);
-    auto structure = gst_caps_get_structure(caps, 0);
-
-    gint width, height;
-    gboolean res = gst_structure_get_int(structure, "width", &width);
-    res |= gst_structure_get_int(structure, "height", &height);
-    if (!res) {
-      gst_sample_unref(sample);
-      return GST_FLOW_ERROR;
-    }
-
-    std::cout << "Got basic data" << std::endl;
-    // Get video name
-    const gchar *gname = gst_structure_get_name(structure);
-    if (!gname)
-      return GST_FLOW_ERROR;
-    std::string name(gname);
-  
-    std::cout << "Name channel " << name  << std::endl;
-    // Get buffer of sample  --> https://github.com/opencv/opencv/blob/17234f82d025e3bbfbf611089637e5aa2038e7b8/modules/videoio/src/cap_gstreamer.cpp#L453
-    GstBuffer *buffer = gst_sample_get_buffer(sample);
-    GstMapInfo mapInfo;
-    if (!buffer || !gst_buffer_map(buffer, &mapInfo, GST_MAP_READ)) {
-      gst_sample_unref(sample);
-      return GST_FLOW_ERROR;
-    }
-
-    std::cout << "Got buffer" << std::endl;
-
-    if (name == "video/x-raw") { // We do not support compressed formats by now.
-      const char *gFormat = gst_structure_get_string(structure, "format");
-      if (!gFormat) {
-        gst_sample_unref(sample);
-        return GST_FLOW_ERROR;
-      }
-
-      
-      std::cout << "Calling callback " << _dartCb << std::endl;
-      // Call dart callback with basic information
-      static_cast<dartImageCallback>(_dartCb)(mapInfo.data, width, height, gFormat);
-      std::cout << "Callback ended" << std::endl;
-  }
-
-    gst_buffer_unmap(buffer, &mapInfo);
-    gst_sample_unref(sample);
-    return GST_FLOW_OK;
-  }
-
-  return GST_FLOW_ERROR;
-}
-
 extern "C" __declspec(dllexport) 
 void* native_gst_get_app_sink_by_name(void *_pipe, char *str) {
   GstElement *pipe = reinterpret_cast<GstElement *>(_pipe);
@@ -168,16 +110,71 @@ void* native_gst_get_app_sink_by_name(void *_pipe, char *str) {
   return sink;
 }
 
-// Unfortunatelly this will provoque  a 3631: error: Cannot invoke native callback outside an isolate....
-// gstreamer system will create a new thread and we cannot call a dart callback in another isolate.... Maybe someday...
-// extern "C" __declspec(dllexport) 
-// void native_gst_signal_connect(void *_pipe, char *str, dartImageCallback _dartCallback) {
-  // GstElement *pipe = reinterpret_cast<GstElement *>(_pipe);
-  // GstElement *sink = gst_bin_get_by_name(GST_BIN(pipe), str);
-  // std::cout << "Found sink with name " << str << " " << sink << ". Connecting to callback." << gst_element_get_name(sink) << std::endl;
-  // g_object_set(sink, "emit-signals", TRUE);
-  // g_signal_connect(sink, "new-sample", G_CALLBACK(newSampleCallback), (void*) _dartCallback);
-// }
+//---------------------------------------------------------------------------------------------------------------------
+extern "C" __declspec(dllexport) 
+void * native_gst_pull_sample(void *_sink) {
+  GstElement *sink = reinterpret_cast<GstElement *>(_sink);
+  GstSample *sample;
+  g_signal_emit_by_name(sink, "pull-sample", &sample);
+  return sample; 
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+extern "C" __declspec(dllexport) 
+void native_gst_sample_release(void *_sample) {
+  GstSample *sample = reinterpret_cast<GstSample *>(_sample);
+  gst_sample_unref(sample);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+extern "C" __declspec(dllexport) 
+int native_gst_sample_width(void *_sample) {
+  GstSample *sample = reinterpret_cast<GstSample *>(_sample);
+  auto caps = gst_sample_get_caps(sample);
+  auto structure = gst_caps_get_structure(caps, 0);
+
+  gint width;
+  gst_structure_get_int(structure, "width", &width);
+  return width; 
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+extern "C" __declspec(dllexport) 
+int native_gst_sample_height(void *_sample) {
+  GstSample *sample = reinterpret_cast<GstSample *>(_sample);
+  auto caps = gst_sample_get_caps(sample);
+  auto structure = gst_caps_get_structure(caps, 0);
+
+  gint height;
+  gst_structure_get_int(structure, "height", &height);
+  return height; 
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+extern "C" __declspec(dllexport) 
+uint8_t * native_gst_sample_buffer(void *_sample) {
+  GstSample *sample = reinterpret_cast<GstSample *>(_sample);
+  auto caps = gst_sample_get_caps(sample);
+  auto structure = gst_caps_get_structure(caps, 0);
+
+  // Get video name
+  const gchar *gname = gst_structure_get_name(structure);
+  if (!gname)
+    return nullptr;
+  std::string name(gname);
+
+  std::cout << "Name channel " << name  << std::endl;
+  // Get buffer of sample  --> https://github.com/opencv/opencv/blob/17234f82d025e3bbfbf611089637e5aa2038e7b8/modules/videoio/src/cap_gstreamer.cpp#L453
+  GstBuffer *buffer = gst_sample_get_buffer(sample);
+  GstMapInfo mapInfo;
+  gst_buffer_map(buffer, &mapInfo, GST_MAP_READ);
+
+  if (name == "video/x-raw") { // We do not support compressed formats by now.
+    // const char *gFormat = gst_structure_get_string(structure, "format");
+    return mapInfo.data; 
+  }
+  return nullptr;
+}
 
 typedef int (*IntptrBinOp)(int a, int b);
 

@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:ffi/ffi.dart';
 
@@ -32,7 +35,7 @@ class GstreamerLaunch {
     return nativeEdgeDetection;
   }
 
-  static Future<GstElement> nativeGstParseLaunch(String cmd) async {
+  static Future<GstElement> parseLaunch(String cmd) async {
     var nativeLib = _getDynamicLibraryGst();
     var gstLaunch = nativeLib.lookupFunction<NativeGstLaunchFunction,
         NativeGstLaunchFunction>("native_gst_parse_launch");
@@ -43,7 +46,7 @@ class GstreamerLaunch {
     return GstElement(nativePtr: gstLaunch(nativeCmd));
   }
 
-  static Future<void> nativeGstSetElementstate( GstElement element, int state) async {
+  static Future<void> setElementState( GstElement element, int state) async {
     var nativeLib = _getDynamicLibraryGst();
     var gstSetElementState = nativeLib.lookupFunction<
         Void Function(Pointer<Void>, Int16),
@@ -60,32 +63,37 @@ class GstreamerLaunch {
     
     return GstElement(nativePtr: gstSignalConnect(element.nativePtr, sinkname.toNativeUtf8()));
   }
-  
-  static Future<> pullSampleAndRunCallback( GstElement _appSink, DartImageCallbackPrototype _callback) async {
+
+  static Future<Uint8List> pullSample( GstElement _appSink) async {
     var nativeLib = _getDynamicLibraryGst();
 
-    var gstSignalConnect = nativeLib.lookupFunction<
-        Void Function(Pointer<Void>, Pointer<NativeFunction<DartImageCallbackPrototypeNative>>),
-        void Function(Pointer<Void>, Pointer<NativeFunction<DartImageCallbackPrototypeNative>>)>("native_gst_pull_sample_callback");
+    var pullSampleFn = nativeLib.lookupFunction<    Pointer<Void> Function(Pointer<Void>), 
+                                                    Pointer<Void> Function(Pointer<Void>)>("native_gst_pull_sample");
+    var sampleWidthFn = nativeLib.lookupFunction<   Int32 Function(Pointer<Void>), 
+                                                    int Function(Pointer<Void>)>("native_gst_sample_width");
+    var sampleHeightFn = nativeLib.lookupFunction<  Int32 Function(Pointer<Void>), 
+                                                    int Function(Pointer<Void>)>("native_gst_sample_height");
+    var sampleBufferFn = nativeLib.lookupFunction<  Pointer<Uint8> Function(Pointer<Void>), 
+                                                    Pointer<Uint8> Function(Pointer<Void>)>("native_gst_sample_buffer");
     
+    Pointer<Void> sample = pullSampleFn(_appSink.nativePtr);
+    int width = sampleWidthFn(sample);
+    int height = sampleHeightFn(sample);
+    Pointer<Uint8> buffer = sampleBufferFn(sample);
 
-    Pointer<NativeFunction<DartImageCallbackPrototypeNative>> pointer = Pointer.fromFunction(_callback, 0);
+    print(width);
+    print(height);
+    print(buffer.toString());
+    var bytes = buffer.asTypedList(width*height*3);
 
-    gstSignalConnect(_appSink.nativePtr, pointer);
+    late Image image;
+    decodeImageFromPixels(bytes, width, height, PixelFormat.rgba8888, (result){
+      print(result);
+    });
 
+    return bytes;
   }
 
-  // static Future<void> nativeGstSignalConnect( GstElement element, String sinkname) async {
-  //   var nativeLib = _getDynamicLibraryGst();
 
-  //   var gstSignalConnect = nativeLib.lookupFunction<
-  //       Void Function(Pointer<Void>, Pointer<Utf8>, Pointer<NativeFunction<DartCallbackPrototype>>),
-  //       void Function(Pointer<Void>, Pointer<Utf8>, Pointer<NativeFunction<DartCallbackPrototype>>)>("native_gst_signal_connect");
-    
-
-  //   Pointer<NativeFunction<Int32 Function(Pointer<Uint8>,Int32, Int32, Pointer<Utf8>)>> pointer = Pointer.fromFunction(dartCallback, 0);
-
-  //   gstSignalConnect(element.nativePtr, sinkname.toNativeUtf8(), pointer);
-  // }
 
 }
