@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:bitmap/bitmap.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:ffi/ffi.dart';
@@ -19,6 +20,14 @@ typedef GstreamerCallbackVideo = Void Function(void);
 
 typedef DartImageCallbackPrototypeNative = Int32 Function(Pointer<Uint8>, Int32, Int32, Pointer<Utf8>);
 typedef DartImageCallbackPrototype = int Function(Pointer<Uint8>, int, int, Pointer<Utf8>);
+
+class ImageData{
+    late int width;
+    late int height;
+    late Pointer<Uint8> buffer;
+
+    ImageData(this.width, this.height, this.buffer);
+}
 
 class GstreamerLaunch {
   static const MethodChannel _channel = MethodChannel('gstreamer_launch');
@@ -64,7 +73,7 @@ class GstreamerLaunch {
     return GstElement(nativePtr: gstSignalConnect(element.nativePtr, sinkname.toNativeUtf8()));
   }
 
-  static Future<Uint8List> pullSample( GstElement _appSink) async {
+  static Future<ImageData> pullSample( GstElement _appSink) async {
     var nativeLib = _getDynamicLibraryGst();
 
     var pullSampleFn = nativeLib.lookupFunction<    Pointer<Void> Function(Pointer<Void>), 
@@ -77,21 +86,9 @@ class GstreamerLaunch {
                                                     Pointer<Uint8> Function(Pointer<Void>)>("native_gst_sample_buffer");
     
     Pointer<Void> sample = pullSampleFn(_appSink.nativePtr);
-    int width = sampleWidthFn(sample);
-    int height = sampleHeightFn(sample);
-    Pointer<Uint8> buffer = sampleBufferFn(sample);
+    ImageData data = ImageData(sampleWidthFn(sample), sampleHeightFn(sample), sampleBufferFn(sample));
 
-    print(width);
-    print(height);
-    print(buffer.toString());
-    var bytes = buffer.asTypedList(width*height*3);
-
-    late Image image;
-    decodeImageFromPixels(bytes, width, height, PixelFormat.rgba8888, (result){
-      print(result);
-    });
-
-    return bytes;
+    return data;
   }
 
 

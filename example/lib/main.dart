@@ -5,8 +5,9 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:gstreamer_launch/gstreamer_launch.dart';
-import 'dart:ffi';
-import 'package:ffi/ffi.dart';
+import 'package:image/image.dart' as img_pack;
+
+
 
 void main() {
   runApp(const MyApp());
@@ -24,7 +25,7 @@ class _MyAppState extends State<MyApp> {
 
   late GstElement _gstPipeServer;
   late GstElement _gstPipeClient;
-  Image image = Image.network("https://flutter.dev/assets/images/shared/brand/flutter/logo/flutter-lockup.png");
+//  Image image = Image.network("https://flutter.dev/assets/images/shared/brand/flutter/logo/flutter-lockup.png");
 
   @override
   void initState() {
@@ -127,8 +128,10 @@ class _MyAppState extends State<MyApp> {
                   onPressed: (){
                     var appsink = GstreamerLaunch.getAppSinkByName(_gstPipeClient, "appsink");
                     appsink.then((value){
-                        GstreamerLaunch.pullSample(value).then((bytes){
-                            //image = Image.memory(bytes);
+                        GstreamerLaunch.pullSample(value).then((imageData){
+                            img_pack.Image img = img_pack.Image(460,480);
+                            img.setPixelRgba(0,0, 255, 255, 255);
+                            
                             setState(() {
                               
                             });
@@ -138,8 +141,6 @@ class _MyAppState extends State<MyApp> {
                   child: const Text("Retrieve node"),
                 ),
               ),
-                Container(
-child: image,)
             ],
           )),
     );

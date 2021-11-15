@@ -175,13 +175,3 @@ uint8_t * native_gst_sample_buffer(void *_sample) {
   }
   return nullptr;
 }
-
-typedef int (*IntptrBinOp)(int a, int b);
-
-extern "C" __declspec(dllexport) 
-int ApplyTo42And74(IntptrBinOp binop) {
-  printf("ApplyTo42And74()\n");
-  int retval = binop(42, 74);
-  printf("returning %lu\n", retval);
-  return retval;
-}
