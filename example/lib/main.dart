@@ -25,6 +25,9 @@ class _MyAppState extends State<MyApp> {
 
   late GstElement _gstPipeServer;
   late GstElement _gstPipeClient;
+  late Future<GstElement> _appsink;
+  late Timer timer;
+
   Image image = Image.network(
       "https://www.mozilla.org/media/img/structured-data/logo-firefox-nightly.2ae024a36eed.png");
 
@@ -128,24 +131,25 @@ class _MyAppState extends State<MyApp> {
               Container(
                 child: ElevatedButton(
                   onPressed: () {
-                    var appsink = GstreamerLaunch.getAppSinkByName(
-                        _gstPipeClient, "appsink");
-                    appsink.then((value) {
-                      GstreamerLaunch.pullSample(value).then((imageData) {
-                        img_pack.Image img =
-                            img_pack.Image(imageData.width, imageData.height);
-                        for (var y = 0; y < imageData.height; y++) {
-                          for (var x = 0; x < imageData.width; x++) {
-                            int idx = (y * imageData.width + x) * 3;
-                            var pixel = imageData.buffer.elementAt(idx);
-                            int r = pixel.elementAt(0).value;
-                            int g = pixel.elementAt(1).value;
-                            int b = pixel.elementAt(2).value;
-                            img.setPixelRgba(x, y, r, g, b);
+                    _appsink = GstreamerLaunch.getAppSinkByName( _gstPipeClient, "appsink");
+                    _appsink.then((value) {
+                      timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) {
+                        GstreamerLaunch.pullSample(value).then((imageData) {
+                          img_pack.Image img =
+                              img_pack.Image(imageData.width, imageData.height);
+                          for (var y = 0; y < imageData.height; y++) {
+                            for (var x = 0; x < imageData.width; x++) {
+                              int idx = (y * imageData.width + x) * 3;
+                              var pixel = imageData.buffer.elementAt(idx);
+                              int r = pixel.elementAt(0).value;
+                              int g = pixel.elementAt(1).value;
+                              int b = pixel.elementAt(2).value;
+                              img.setPixelRgba(x, y, r, g, b);
+                            }
                           }
-                        }
-                        image = Image.memory(Uint8List.fromList(img_pack.encodePng(img)));
-                        setState(() {});
+                          image = Image.memory(Uint8List.fromList(img_pack.encodePng(img)));
+                          setState(() {});
+                        });
                       });
                     });
                   },
