@@ -152,6 +152,17 @@ int native_gst_sample_height(void *_sample) {
 
 //---------------------------------------------------------------------------------------------------------------------
 extern "C" __declspec(dllexport) 
+const char * native_gst_sample_format(void *_sample) {
+  GstSample *sample = reinterpret_cast<GstSample *>(_sample);
+  auto caps = gst_sample_get_caps(sample);
+  auto structure = gst_caps_get_structure(caps, 0);
+
+  const char *gFormat = gst_structure_get_string(structure, "format");
+  return gFormat; 
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+extern "C" __declspec(dllexport) 
 uint8_t * native_gst_sample_buffer(void *_sample) {
   GstSample *sample = reinterpret_cast<GstSample *>(_sample);
   auto caps = gst_sample_get_caps(sample);

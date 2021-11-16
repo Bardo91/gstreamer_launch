@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:bitmap/bitmap.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:ffi/ffi.dart';
@@ -25,8 +24,9 @@ class ImageData{
     late int width;
     late int height;
     late Pointer<Uint8> buffer;
+    late String format;
 
-    ImageData(this.width, this.height, this.buffer);
+    ImageData(this.width, this.height, this.buffer, this.format);
 }
 
 class GstreamerLaunch {
@@ -84,9 +84,14 @@ class GstreamerLaunch {
                                                     int Function(Pointer<Void>)>("native_gst_sample_height");
     var sampleBufferFn = nativeLib.lookupFunction<  Pointer<Uint8> Function(Pointer<Void>), 
                                                     Pointer<Uint8> Function(Pointer<Void>)>("native_gst_sample_buffer");
+    var sampleFormatFn = nativeLib.lookupFunction<  Pointer<Utf8> Function(Pointer<Void>), 
+                                                    Pointer<Utf8> Function(Pointer<Void>)>("native_gst_sample_format");
     
     Pointer<Void> sample = pullSampleFn(_appSink.nativePtr);
-    ImageData data = ImageData(sampleWidthFn(sample), sampleHeightFn(sample), sampleBufferFn(sample));
+    ImageData data = ImageData( sampleWidthFn(sample), 
+                                sampleHeightFn(sample), 
+                                sampleBufferFn(sample),
+                                sampleFormatFn(sample).toDartString());
 
     return data;
   }

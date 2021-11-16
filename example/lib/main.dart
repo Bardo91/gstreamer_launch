@@ -1,4 +1,6 @@
+import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -6,8 +8,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:gstreamer_launch/gstreamer_launch.dart';
 import 'package:image/image.dart' as img_pack;
-
-
 
 void main() {
   runApp(const MyApp());
@@ -25,7 +25,8 @@ class _MyAppState extends State<MyApp> {
 
   late GstElement _gstPipeServer;
   late GstElement _gstPipeClient;
-//  Image image = Image.network("https://flutter.dev/assets/images/shared/brand/flutter/logo/flutter-lockup.png");
+  Image image = Image.network(
+      "https://www.mozilla.org/media/img/structured-data/logo-firefox-nightly.2ae024a36eed.png");
 
   @override
   void initState() {
@@ -68,15 +69,16 @@ class _MyAppState extends State<MyApp> {
                       child: ElevatedButton(
                           onPressed: () {
                             String cmd = "";
-                            if(Platform.isLinux){
-                              cmd = "v4l2src ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=0.0.0.0 port=5000";
-                            }else if(Platform.isWindows){
-                              cmd = "ksvideosrc ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000";
-                            }else{
+                            if (Platform.isLinux) {
+                              cmd =
+                                  "v4l2src ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=0.0.0.0 port=5000";
+                            } else if (Platform.isWindows) {
+                              cmd =
+                                  "ksvideosrc ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000";
+                            } else {
                               return;
                             }
-                            GstreamerLaunch.parseLaunch(cmd)
-                                .then((value) {
+                            GstreamerLaunch.parseLaunch(cmd).then((value) {
                               _gstPipeServer = value;
                               GstreamerLaunch.setElementState(
                                   _gstPipeServer, 4);
@@ -87,8 +89,7 @@ class _MyAppState extends State<MyApp> {
                   Expanded(
                       child: ElevatedButton(
                           onPressed: () {
-                            GstreamerLaunch.setElementState(
-                                _gstPipeServer, 1);
+                            GstreamerLaunch.setElementState(_gstPipeServer, 1);
                           },
                           child: const Text("Stop Server")))
                 ],
@@ -99,11 +100,13 @@ class _MyAppState extends State<MyApp> {
                       child: ElevatedButton(
                           onPressed: () {
                             String cmd = "";
-                            if(Platform.isLinux){
-                              cmd = "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! xvimagesink";
-                            }else if(Platform.isWindows){
-                              cmd = "udpsrc address=127.0.0.1 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! appsink name=appsink";
-                            }else{
+                            if (Platform.isLinux) {
+                              cmd =
+                                  "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGB ! xvimagesink";
+                            } else if (Platform.isWindows) {
+                              cmd =
+                                  "udpsrc address=127.0.0.1 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGB ! appsink name=appsink";
+                            } else {
                               return;
                             }
                             GstreamerLaunch.parseLaunch(cmd).then((value) {
@@ -117,30 +120,41 @@ class _MyAppState extends State<MyApp> {
                   Expanded(
                       child: ElevatedButton(
                           onPressed: () {
-                            GstreamerLaunch.setElementState(
-                                _gstPipeClient, 1);
+                            GstreamerLaunch.setElementState(_gstPipeClient, 1);
                           },
                           child: const Text("Stop Client")))
                 ],
               ),
               Container(
-                child:  ElevatedButton(
-                  onPressed: (){
-                    var appsink = GstreamerLaunch.getAppSinkByName(_gstPipeClient, "appsink");
-                    appsink.then((value){
-                        GstreamerLaunch.pullSample(value).then((imageData){
-                            img_pack.Image img = img_pack.Image(460,480);
-                            img.setPixelRgba(0,0, 255, 255, 255);
-                            
-                            setState(() {
-                              
-                            });
-                          });
-                        });
+                child: ElevatedButton(
+                  onPressed: () {
+                    var appsink = GstreamerLaunch.getAppSinkByName(
+                        _gstPipeClient, "appsink");
+                    appsink.then((value) {
+                      GstreamerLaunch.pullSample(value).then((imageData) {
+                        img_pack.Image img =
+                            img_pack.Image(imageData.width, imageData.height);
+                        for (var y = 0; y < imageData.height; y++) {
+                          for (var x = 0; x < imageData.width; x++) {
+                            int idx = (y * imageData.width + x) * 3;
+                            var pixel = imageData.buffer.elementAt(idx);
+                            int r = pixel.elementAt(0).value;
+                            int g = pixel.elementAt(1).value;
+                            int b = pixel.elementAt(2).value;
+                            img.setPixelRgba(x, y, r, g, b);
+                          }
+                        }
+                        image = Image.memory(Uint8List.fromList(img_pack.encodePng(img)));
+                        setState(() {});
+                      });
+                    });
                   },
                   child: const Text("Retrieve node"),
                 ),
               ),
+              Container(
+                child: image,
+              )
             ],
           )),
     );
