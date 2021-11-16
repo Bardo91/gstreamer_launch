@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:gstreamer_launch/GstreamerCustomPainter.dart';
 import 'package:gstreamer_launch/gstreamer_launch.dart';
 import 'package:image/image.dart' as img_pack;
 
@@ -26,7 +27,9 @@ class _MyAppState extends State<MyApp> {
   late GstElement _gstPipeServer;
   late GstElement _gstPipeClient;
   late Future<GstElement> _appsink;
-  late Timer timer;
+  bool isInit = false;
+  late ValueNotifier<int> _notifier;
+  late Timer _timerNotifier;
 
   Image image = Image.network(
       "https://www.mozilla.org/media/img/structured-data/logo-firefox-nightly.2ae024a36eed.png");
@@ -35,6 +38,10 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
+
+  _notifier = ValueNotifier<int>(0);
+  _timerNotifier = Timer.periodic(const Duration(milliseconds: 30), (Timer t) { _notifier.value++;});
+
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -117,6 +124,8 @@ class _MyAppState extends State<MyApp> {
                               GstreamerLaunch.setElementState(
                                   _gstPipeClient, 4);
                             });
+                            isInit = true;
+                            setState(() {});
                           },
                           child: const Text("Start Client"))),
                   const SizedBox(width: 10),
@@ -129,36 +138,50 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               Container(
-                child: ElevatedButton(
-                  onPressed: () {
-                    _appsink = GstreamerLaunch.getAppSinkByName( _gstPipeClient, "appsink");
-                    _appsink.then((value) {
-                      timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) {
-                        GstreamerLaunch.pullSample(value).then((imageData) {
-                          img_pack.Image img =
-                              img_pack.Image(imageData.width, imageData.height);
-                          for (var y = 0; y < imageData.height; y++) {
-                            for (var x = 0; x < imageData.width; x++) {
-                              int idx = (y * imageData.width + x) * 3;
-                              var pixel = imageData.buffer.elementAt(idx);
-                              int r = pixel.elementAt(0).value;
-                              int g = pixel.elementAt(1).value;
-                              int b = pixel.elementAt(2).value;
-                              img.setPixelRgba(x, y, r, g, b);
-                            }
-                          }
-                          image = Image.memory(Uint8List.fromList(img_pack.encodePng(img)));
-                          setState(() {});
-                        });
-                      });
-                    });
-                  },
-                  child: const Text("Retrieve node"),
+                child: LayoutBuilder(
+                  builder: (_, constraints) => Container(
+                    width: 666,
+                    height: 666,
+                    child: isInit
+                        ? CustomPaint(
+                            painter: GstreamerCustomPainter(
+                                GstreamerLaunch.getAppSinkByName(
+                                    _gstPipeClient, "appsink"), _notifier))
+                        : Container(child: image, )
+                  ),
                 ),
-              ),
-              Container(
-                child: image,
               )
+              // Container(
+              //   child: ElevatedButton(
+              //     onPressed: () {
+              //       _appsink = GstreamerLaunch.getAppSinkByName( _gstPipeClient, "appsink");
+              //       _appsink.then((value) {
+              //         timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) {
+              //           GstreamerLaunch.pullSample(value).then((imageData) {
+              //             img_pack.Image img =
+              //                 img_pack.Image(imageData.width, imageData.height);
+              //             for (var y = 0; y < imageData.height; y++) {
+              //               for (var x = 0; x < imageData.width; x++) {
+              //                 int idx = (y * imageData.width + x) * 3;
+              //                 var pixel = imageData.buffer.elementAt(idx);
+              //                 int r = pixel.elementAt(0).value;
+              //                 int g = pixel.elementAt(1).value;
+              //                 int b = pixel.elementAt(2).value;
+              //                 img.setPixelRgba(x, y, r, g, b);
+              //               }
+              //             }
+              //             image = Image.memory(Uint8List.fromList(img_pack.encodePng(img)));
+              //             setState(() {});
+              //           });
+              //         });
+              //       });
+              //     },
+              //     child: const Text("Retrieve node"),
+              //   ),
+              // ),
+              // Container(
+              //   child: image,
+              // )
             ],
           )),
     );
