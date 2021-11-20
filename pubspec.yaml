@@ -1,6 +1,6 @@
 name: gstreamer_launch
 description: A simple wrapper of gst for linux and windows.
-version: 0.1.1-dev.2
+version: 0.1.2-dev.1
 homepage:
 repository: https://github.com/Bardo91/gstreamer_launch
 
