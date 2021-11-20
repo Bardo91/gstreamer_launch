@@ -112,10 +112,10 @@ class _MyAppState extends State<MyApp> {
                             String cmd = "";
                             if (Platform.isLinux) {
                               cmd =
-                                  "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGB ! xvimagesink";
+                                  "udpsrc address=0.0.0.0 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGBA ! xvimagesink";
                             } else if (Platform.isWindows) {
                               cmd =
-                                  "udpsrc address=127.0.0.1 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGB ! appsink name=appsink";
+                                  "udpsrc address=127.0.0.1 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGBA ! appsink name=appsink";
                             } else {
                               return;
                             }
@@ -151,37 +151,6 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
               )
-              // Container(
-              //   child: ElevatedButton(
-              //     onPressed: () {
-              //       _appsink = GstreamerLaunch.getAppSinkByName( _gstPipeClient, "appsink");
-              //       _appsink.then((value) {
-              //         timer = Timer.periodic(Duration(milliseconds: 500), (Timer t) {
-              //           GstreamerLaunch.pullSample(value).then((imageData) {
-              //             img_pack.Image img =
-              //                 img_pack.Image(imageData.width, imageData.height);
-              //             for (var y = 0; y < imageData.height; y++) {
-              //               for (var x = 0; x < imageData.width; x++) {
-              //                 int idx = (y * imageData.width + x) * 3;
-              //                 var pixel = imageData.buffer.elementAt(idx);
-              //                 int r = pixel.elementAt(0).value;
-              //                 int g = pixel.elementAt(1).value;
-              //                 int b = pixel.elementAt(2).value;
-              //                 img.setPixelRgba(x, y, r, g, b);
-              //               }
-              //             }
-              //             image = Image.memory(Uint8List.fromList(img_pack.encodePng(img)));
-              //             setState(() {});
-              //           });
-              //         });
-              //       });
-              //     },
-              //     child: const Text("Retrieve node"),
-              //   ),
-              // ),
-              // Container(
-              //   child: image,
-              // )
             ],
           )),
     );
