@@ -27,3 +27,7 @@ flutter:
         pluginClass: GstreamerLaunchPlugin
       windows:
         pluginClass: GstreamerLaunchPlugin
+      android:
+        package: com.bardo91.gstreamer_launch
+        pluginClass: GstreamerLaunchPlugin
+
