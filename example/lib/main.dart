@@ -88,7 +88,8 @@ class _MyAppState extends State<MyApp> {
                               cmd =
                                   "ksvideosrc ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000";
                             } else if (Platform.isAndroid) {
-                              GstreamerLaunch.platformVersion.then((value)=>print(value));
+                              GstreamerLaunch.platformVersion
+                                  .then((value) => print(value));
                               return;
                             } else {
                               return;
@@ -121,6 +122,10 @@ class _MyAppState extends State<MyApp> {
                             } else if (Platform.isWindows) {
                               cmd =
                                   "udpsrc address=127.0.0.1 port=5000 ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG,framerate=30/1 ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGBA ! appsink name=appsink";
+                            } else if (Platform.isAndroid) {
+                              GstreamerLaunch.platformVersion
+                                  .then((value) => print(value));
+                              cmd = "videotestsrc ! autovideosink";
                             } else {
                               return;
                             }
