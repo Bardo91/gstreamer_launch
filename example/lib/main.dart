@@ -39,9 +39,11 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     initPlatformState();
 
-  _notifier = ValueNotifier<int>(0);
-  _timerNotifier = Timer.periodic(const Duration(milliseconds: 30), (Timer t) { _notifier.value++;});
-
+    _notifier = ValueNotifier<int>(0);
+    _timerNotifier =
+        Timer.periodic(const Duration(milliseconds: 30), (Timer t) {
+      _notifier.value++;
+    });
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -85,6 +87,9 @@ class _MyAppState extends State<MyApp> {
                             } else if (Platform.isWindows) {
                               cmd =
                                   "ksvideosrc ! videoconvert ! video/x-raw,format=YUY2,width=640,height=480,framerate=30/1 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000";
+                            } else if (Platform.isAndroid) {
+                              GstreamerLaunch.platformVersion.then((value)=>print(value));
+                              return;
                             } else {
                               return;
                             }
@@ -140,15 +145,17 @@ class _MyAppState extends State<MyApp> {
               Container(
                 child: LayoutBuilder(
                   builder: (_, constraints) => Container(
-                    width: 666,
-                    height: 666,
-                    child: isInit
-                        ? CustomPaint(
-                            painter: GstreamerCustomPainter(
-                                GstreamerLaunch.getAppSinkByName(
-                                    _gstPipeClient, "appsink"), _notifier))
-                        : Container(child: image, )
-                  ),
+                      width: 666,
+                      height: 666,
+                      child: isInit
+                          ? CustomPaint(
+                              painter: GstreamerCustomPainter(
+                                  GstreamerLaunch.getAppSinkByName(
+                                      _gstPipeClient, "appsink"),
+                                  _notifier))
+                          : Container(
+                              child: image,
+                            )),
                 ),
               )
             ],

@@ -33,3 +33,9 @@ android {
         minSdkVersion 16
     }
 }
+
+
+dependencies {
+    implementation 'org.freedesktop.gstreamer:gst1-java-core:1.4.0'
+}
+
