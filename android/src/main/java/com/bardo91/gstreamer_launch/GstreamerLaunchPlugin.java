@@ -16,7 +16,7 @@ public class GstreamerLaunchPlugin implements FlutterPlugin, MethodCallHandler {
       System.loadLibrary("gstreamer_launch_android_native");
   }
 
-  public native int Jniint();
+  public native int stringFromJNI();
 
 
   @Override
@@ -27,10 +27,8 @@ public class GstreamerLaunchPlugin implements FlutterPlugin, MethodCallHandler {
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    Gst.init(Version.BASELINE, "GstreamerLaunchPlugin", "");  // See to initialize once. Nevertheless, it is done internally but is more elegant.
-
     if (call.method.equals("getPlatformVersion")) {
-      result.success("Android " + android.os.Build.VERSION.RELEASE + ". GStreamer version " + String.valueOf(Jniint()));
+      result.success("Android " + android.os.Build.VERSION.RELEASE + ". GStreamer version " + stringFromJNI());
     }else if (call.method.equals("android_gst_parse_launch")) {
       String cmd = call.argument("cmd");
     }else if (call.method.equals("android_gst_element_set_state")) {
