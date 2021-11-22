@@ -9,6 +9,19 @@ find_library( log-lib log )
 target_link_libraries( gstreamer_launch_android_native PRIVATE ${log-lib} )
 
 
-set(GSTREAMER_ANDROID_INCLUDE_DIRS C:/gstreamer-1.0-android-universal-1.18.5/armv7/include/gstreamer-1.0/gst)
+set(GSTREAMER_ANDROID_ROOT C:/gstreamer-1.0-android-universal-1.18.5)
+set(ARCH_ABI armv7)
+set(GSTREAMER_ANDROID_ROOT_INCLUDE ${GSTREAMER_ANDROID_ROOT}/${ARCH_ABI}/include)
+set(GSTREAMER_ANDROID_INCLUDE_DIRS  ${GSTREAMER_ANDROID_ROOT_INCLUDE}/gstreamer-1.0
+                                    ${GSTREAMER_ANDROID_ROOT_INCLUDE}/glib-2.0
+                                    ${GSTREAMER_ANDROID_ROOT}/${ARCH_ABI}/lib/glib-2.0/include)
 
 target_include_directories(gstreamer_launch_android_native PRIVATE ${GSTREAMER_ANDROID_INCLUDE_DIRS})
+
+
+
+set(GSTREAMER_ANDROID_LIB_DIR ${GSTREAMER_ANDROID_ROOT}/${ARCH_ABI}/lib)
+
+file(GLOB_RECURSE GSTREAMER_STATIC_LIBRARIES "${GSTREAMER_ANDROID_LIB_DIR}/*.a")
+message(FATAL_ERROR LIBS: ${GSTREAMER_STATIC_LIBRARIES})
+target_link_libraries(gstreamer_launch_android_native PRIVATE  ${GSTREAMER_STATIC_LIBRARIES})
