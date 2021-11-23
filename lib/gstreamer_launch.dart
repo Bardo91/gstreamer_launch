@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:ffi/ffi.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class GstElement {
   GstElement();
